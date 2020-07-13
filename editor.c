@@ -105,6 +105,8 @@ struct editorConfig {
   char *filename;
   char statusmsg[80];
   time_t statusmsg_time;
+  /* 0 is standard, 1 is editing */ 
+  int editorMode;
   struct editorSyntax *syntax;
   struct termios orig_termios;
 };
@@ -203,7 +205,6 @@ int editorReadKey() {
     if (nread == -1 && errno != EAGAIN) die("read");
   }
 
-  /* the arrow keys are multibyte escape characters */ 
   if (c == '\x1b') {
     char seq[3];
 
@@ -996,6 +997,7 @@ void editorMoveCursor(int key) {
   /* change the cursor x and y values (convention is 0 at the top, 0 at the left) */
   switch (key) {
     case ARROW_LEFT:
+    case 'h':
       if (E.cx != 0) {
         E.cx--;
         /* check we are not at the top of the document */ 
@@ -1006,6 +1008,7 @@ void editorMoveCursor(int key) {
       }
       break;
     case ARROW_RIGHT:
+    case 'l':
       /* limits scrolling to the right */ 
       if (row && E.cx < row->size) {
         E.cx++;
@@ -1015,11 +1018,13 @@ void editorMoveCursor(int key) {
       }
       break;
     case ARROW_UP:
+    case 'k':
       if (E.cy != 0) {
         E.cy--;
       }
       break;
     case ARROW_DOWN:
+    case 'j':
       if (E.cy < E.numrows) {
         E.cy++;
       }
@@ -1045,10 +1050,6 @@ void editorProcessKeypress() {
   int c = editorReadKey();
 
   switch(c) {
-    case '\r':
-      editorInsertNewline();
-      break;
-
     /* quits */ 
     case CTRL_KEY('q'): 
       if (E.dirty && quit_times > 0) {
@@ -1085,17 +1086,8 @@ void editorProcessKeypress() {
       editorFind();
       break;
 
-    case BACKSPACE:
-    case CTRL_KEY('h'):
-    case DEL_KEY:
-      /* handle the delete key by backspacing and moving right */ 
-      if (c == DEL_KEY) editorMoveCursor(ARROW_RIGHT);
-      editorDelChar();
-      break;
-
     case PAGE_UP:
     case PAGE_DOWN:
-      /* using code braces so we can declrae */ 
       /* we implement page up and down by running up and down enough times to move a page */
       {
         if (c == PAGE_UP) {
@@ -1126,9 +1118,49 @@ void editorProcessKeypress() {
       break;
 
     default:
-      editorInsertChar(c);
-      break;
-  }
+      if (E.editorMode == 1) {
+        switch(c) {
+          case '\r':
+            editorInsertNewline();
+            break;
+
+          case BACKSPACE:
+          case CTRL_KEY('h'):
+          case DEL_KEY:
+            /* handle the delete key by backspacing and moving right */ 
+            if (c == DEL_KEY) editorMoveCursor(ARROW_RIGHT);
+            editorDelChar();
+            break;
+
+          /* ctrl-j to enter insert mode */ 
+          case CTRL_KEY('j'):
+            E.editorMode = 0;
+            break;
+
+          default: 
+            editorInsertChar(c);
+        }
+      } else {
+        switch(c) {
+          case 'h':
+          case 'j':
+          case 'k':
+          case 'l':
+            editorMoveCursor(c);
+            break;
+
+          case 'i':
+            E.editorMode = 1;
+            break;
+
+          /* case '\r': */
+          /*   editorInsertNewline(); */
+          /*   E.cy++; */
+          /*   E.editorMode = 1; */
+          /*   break; */
+        }
+      }
+    }
 
   quit_times = EDITOR_QUIT_TIMES;
 }
@@ -1259,7 +1291,7 @@ void editorDrawStatusBar(struct abuf *ab) {
   char status[80], rstatus[80];
 
   /* declares the left side status string */ 
-  int len = snprintf(status, sizeof(status), "%.20s - %d lines %s", E.filename ? E.filename : "[No Name]", E.numrows, E.dirty ? "(modified)" : "");
+  int len = snprintf(status, sizeof(status), "%.20s - %d lines %s - %s", E.filename ? E.filename : "[No Name]", E.numrows, E.dirty ? "(modified)" : "", E.editorMode ? "ed" : "st");
 
   /* declares the right side status string */ 
   int rlen = snprintf(rstatus, sizeof(status), "%s | %d/%d", E.syntax ? E.syntax->filetype : "no ft", E.cy + 1, E.numrows);
