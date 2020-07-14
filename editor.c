@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1190,7 +1191,6 @@ void editorScroll() {
 }
 
 void editorDrawRows(struct abuf *ab) {
-  /* draw a tilde at the start of rows */ 
   int y;
   for (y = 0; y < E.screenrows; y++) {
     /* calculate our position in the file with the new offset */ 
@@ -1207,6 +1207,7 @@ void editorDrawRows(struct abuf *ab) {
         /* divide the screeen in 2 and subtract half the string length */ 
         int padding = (E.screencols - welcomelen) / 2;
         if (padding) {
+          /* draw a tilde at the start of rows */ 
           abAppend(ab, "~", 1);
           padding--;
         }
@@ -1223,6 +1224,15 @@ void editorDrawRows(struct abuf *ab) {
 
       /* if it goes above the number of columns, we set it back to the max */
       if (len > E.screencols) len = E.screencols;
+
+      /* print line number */
+      char ln[1000];
+      snprintf(ln, sizeof(ln), "%d", filerow);
+
+      int numlength = (filerow== 0) ? 1  : (log10(filerow) + 1);
+      abAppend(ab, ln, numlength);
+      abAppend(ab, " ", 1);
+
 
       /* feeding render to abAppend character by character */ 
       /* loop through the characters and precede it with the */ 
