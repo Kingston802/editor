@@ -1086,14 +1086,16 @@ void editorProcessKeypress() {
       editorFind();
       break;
 
+    case CTRL_KEY('e'): 
+    case CTRL_KEY('y'): 
     case PAGE_UP:
     case PAGE_DOWN:
       /* we implement page up and down by running up and down enough times to move a page */
       {
-        if (c == PAGE_UP) {
+        if (c == PAGE_UP || c == CTRL_KEY('y')) {
           /* position cursor at the top of the page */
           E.cy = E.rowoff;
-        } else if (c == PAGE_DOWN) {
+        } else if (c == PAGE_DOWN || c == CTRL_KEY('e')) {
           /* position cursor at the bottom of the page */ 
           E.cy = E.rowoff + E.screenrows - 1;
           if (E.cy > E.numrows) E.cy = E.numrows;
@@ -1101,7 +1103,7 @@ void editorProcessKeypress() {
 
         int times = E.screenrows;
         while (times--)
-          editorMoveCursor(c == PAGE_UP ? ARROW_UP : ARROW_DOWN);
+          editorMoveCursor(c == PAGE_UP || c == CTRL_KEY('y') ? ARROW_UP : ARROW_DOWN);
       }
       break;
 
