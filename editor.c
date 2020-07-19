@@ -101,6 +101,7 @@ struct editorConfig {
   int screenrows;
   int screencols;
   int numrows;
+  int lnlen;
   erow *row;
   int dirty;
   char *filename;
@@ -501,7 +502,7 @@ void editorSelectSyntaxHighlight() {
 /*** row operations ***/
 
 int editorRowCxToRx(erow *row, int cx) {
-  int rx = 0;
+  int rx = E.lnlen;
   int j;
   for (j = 0; j < cx; j++) {
     /* if the charater is a tab */
@@ -520,7 +521,7 @@ int editorRowRxToCx(erow *row, int rx) {
   /* calculating the current rx value */ 
   /* stopping when cur_rx hits the given rx value */
   /* and return cx */
-  int cur_rx = 0;
+  int cur_rx = E.lnlen;
   int cx;
   for (cx = 0; cx < row->size; cx++) {
     if (row->chars[cx] == '\t')
@@ -699,6 +700,9 @@ void editorInsertNewline() {
   /* move the cursor down one and back to the left */ 
   E.cy++;
   E.cx = 0;
+
+  /* recalculate line number length */ 
+  E.lnlen = (E.numrows == 0) ? 1  : (log10(E.numrows) + 2);
 }
 void editorDelChar() {
   /* if the cursor is past the end of the file, there is nothing to delete */ 
@@ -779,6 +783,9 @@ void editorOpen(char *filename) {
   free(line);
   fclose(fp);
   E.dirty = 0;
+
+
+  E.lnlen = (E.numrows == 0) ? 1  : (log10(E.numrows) + 1);
 }
 
 void editorSave() {
@@ -1171,7 +1178,7 @@ void editorProcessKeypress() {
 /*** output ***/
 
 void editorScroll() {
-  E.rx = E.cx; 
+  E.rx = E.cx + E.lnlen + 2; 
 
   /* check if the cursor is above the window */ 
   if (E.cy < E.rowoff) {
@@ -1227,11 +1234,17 @@ void editorDrawRows(struct abuf *ab) {
 
       /* print line number */
       char ln[1000];
-      snprintf(ln, sizeof(ln), "%d", filerow);
+      snprintf(ln, sizeof(ln), "%d", filerow+1);
 
+      /* prints spaces so that lines will not move */ 
+      /* when scrolling down */ 
       int numlength = (filerow== 0) ? 1  : (log10(filerow) + 1);
+      int j;
+      for (j=0; j<E.lnlen-numlength; j++) 
+        abAppend(ab, " ", 1);
+
       abAppend(ab, ln, numlength);
-      abAppend(ab, " ", 1);
+      abAppend(ab, "| ", 2);
 
 
       /* feeding render to abAppend character by character */ 
@@ -1243,7 +1256,6 @@ void editorDrawRows(struct abuf *ab) {
       char *c = &E.row[filerow].render[E.coloff];
       unsigned char *hl = &E.row[filerow].hl[E.coloff];
       int current_colour = -1;
-      int j;
       for (j=0; j<len; j++) {
         /* check if is control character */ 
         /* turn it into a printable character */ 
