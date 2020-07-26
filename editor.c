@@ -702,7 +702,7 @@ void editorInsertNewline() {
   E.cx = 0;
 
   /* recalculate line number length */ 
-  E.lnlen = (E.numrows == 0) ? 1  : (log10(E.numrows) + 2);
+  E.lnlen = (E.numrows == 0) ? 1  : floor(log10(E.numrows)) + 1;
 }
 void editorDelChar() {
   /* if the cursor is past the end of the file, there is nothing to delete */ 
@@ -785,7 +785,7 @@ void editorOpen(char *filename) {
   E.dirty = 0;
 
 
-  E.lnlen = (E.numrows == 0) ? 1  : (log10(E.numrows) + 1);
+  E.lnlen = (E.numrows == 0) ? 1  : floor(log10(E.numrows)) + 1;
 }
 
 void editorSave() {
@@ -1232,18 +1232,18 @@ void editorDrawRows(struct abuf *ab) {
       /* if it goes above the number of columns, we set it back to the max */
       if (len > E.screencols) len = E.screencols;
 
-      /* print line number */
+      /* make ln the string version of the filerow */
       char ln[1000];
-      snprintf(ln, sizeof(ln), "%d", filerow+1);
+      snprintf(ln, sizeof(ln), "%d", filerow);
 
       /* prints spaces so that lines will not move */ 
       /* when scrolling down */ 
-      int numlength = (filerow== 0) ? 1  : (log10(filerow) + 1);
+      int numlength = (filerow==0) ? 1  : (log10(filerow) + 1);
       int j;
       for (j=0; j<E.lnlen-numlength; j++) 
         abAppend(ab, " ", 1);
 
-      abAppend(ab, ln, numlength);
+      abAppend(ab, ln, numlength+1);
       abAppend(ab, "| ", 2);
 
 
