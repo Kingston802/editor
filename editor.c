@@ -1243,7 +1243,14 @@ void editorDrawRows(struct abuf *ab) {
       for (j=0; j<E.lnlen-numlength; j++) 
         abAppend(ab, " ", 1);
 
-      abAppend(ab, ln, numlength+1);
+      /* highlight current line */ 
+      if (filerow==E.cy) {
+        abAppend(ab, "\x1b[7m", 4);
+        abAppend(ab, ln, numlength+1);
+        abAppend(ab, "\x1b[m", 3);
+      } else {
+        abAppend(ab, ln, numlength+1);
+      }
       abAppend(ab, "| ", 2);
 
 
