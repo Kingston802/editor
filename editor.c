@@ -785,7 +785,7 @@ void editorOpen(char *filename) {
   E.dirty = 0;
 
 
-  E.lnlen = (E.numrows == 0) ? 1  : floor(log10(E.numrows)) + 1;
+  E.lnlen = (E.numrows == 0) ? 1  : floor(log10(E.numrows+1)) + 1;
 }
 
 void editorSave() {
@@ -1234,11 +1234,11 @@ void editorDrawRows(struct abuf *ab) {
 
       /* make ln the string version of the filerow */
       char ln[1000];
-      snprintf(ln, sizeof(ln), "%d", filerow);
+      snprintf(ln, sizeof(ln), "%d", filerow+1);
 
       /* prints spaces so that lines will not move */ 
       /* when scrolling down */ 
-      int numlength = (filerow==0) ? 1  : (log10(filerow) + 1);
+      int numlength = (filerow==0) ? 1  : (log10(filerow+1) + 1);
       int j;
       for (j=0; j<E.lnlen-numlength; j++) 
         abAppend(ab, " ", 1);
