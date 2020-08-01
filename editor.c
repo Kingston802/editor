@@ -1446,7 +1446,7 @@ int main(int argc, char *argv[]) {
     editorOpen(argv[1]);
   }
 
-  editorSetStatusMessage("HELP: ctrl-s = save | ctrl-q = quit | ctrl-f = find");
+  editorSetStatusMessage("HELP: i = edit mode | ctrl-j = standard mode | ctrl-s = save | ctrl-q = quit | ctrl-f = find");
 
   /* run loop that refreshes the screen and reads keypresses */ 
   while (1) {
