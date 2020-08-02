@@ -1207,7 +1207,7 @@ void editorDrawRows(struct abuf *ab) {
       if (E.numrows == 0 && y == E.screenrows / 3) {
         /* if there are no rows (no file) then print welcome screen */ 
         char welcome[80];
-        int welcomelen = snprintf(welcome, sizeof(welcome),"editor -- version %s", EDITOR_VERSION);
+        int welcomelen = snprintf(welcome, sizeof(welcome),"editor.");
 
         if (welcomelen > E.screencols) welcomelen = E.screencols;
 
