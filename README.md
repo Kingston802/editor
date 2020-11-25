@@ -1,9 +1,10 @@
 # EDITOR
-![Image of home page](homepage.png)
+![Image of home page](images/homepage.png)
 This is an editor written in under 2000 lines of C code with *plenty* of comments.
 It was made as a learning exercise to be as close to a hard-coded version of my vimrc as possible.
 
 ## Features
+![Demo gif](images/gif.GIF)
 * Insert (edit) and normal (standard) modes 
 * Search your text files with `ctrl-f`
 * Write to files with `ctrl-s`
