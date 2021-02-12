@@ -10,8 +10,12 @@ It was made as a learning exercise to be as close to a hard-coded version of my 
 * Write to files with `ctrl-s`
 * Press `ctrl-q` three times to exit without saving
 
+## Differences between editor and Kilo 
+* (Some) Vim binding support (supports HJKL / visual mode)
+* Visual differences (changed mode titles and increased spacing) 
+
 ## Install
-Requires GCC and Make.
+Requires GCC and Make on linux or MacOS.
 
 Run make.
 
